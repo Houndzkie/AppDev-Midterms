@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <title>Pyramids of Egypt • Official Tourism Portal</title>
+    <link rel="icon" type="image/png" href="favicon.png" />
+    
+    <!-- Google Fonts for Monumental Egyptian Styling -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS Engine -->
+    <script src="tailwindcss.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        egypt: {
+                            50: '#FDFBF7',
+                            100: '#F8F1E5',
+                            200: '#EFE1C5',
+                            300: '#E4CC9C',
+                            400: '#D6B26A',
+                            500: '#C59A40',
+                            600: '#AA7C30',
+                            700: '#8A5D27',
+                            800: '#724B25',
+                            900: '#5F3E22',
+                            gold: '#E5A93C',
+                            goldBright: '#FBBF24',
+                            goldDark: '#B8860B',
+                            sand: '#F7E7CE',
+                            night: '#0B0F19',
+                            nightLighter: '#111827',
+                            card: '#161F30',
+                            cardBorder: '#23304A'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+                        serif: ['Cinzel', 'Georgia', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="app.css" />
+    <HeadOutlet @rendermode="InteractiveServer" />
+</head>
+
+<body class="bg-egypt-night text-slate-100 font-sans min-h-screen selection:bg-amber-400 selection:text-slate-950">
+    <Routes @rendermode="InteractiveServer" />
+    <script src="_framework/blazor.web.js"></script>
+</body>
+
+</html>

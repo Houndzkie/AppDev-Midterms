@@ -1,0 +1,206 @@
+@page "/login"
+@inject TravelDataService TravelService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Login • Egypt Pyramids Tourism</PageTitle>
+
+<div class="relative min-h-[calc(100vh-5rem)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <!-- Atmospheric Desert Background Accents -->
+    <div class="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 pointer-events-none"></div>
+    <div class="absolute -top-40 -right-40 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-yellow-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="relative max-w-md w-full space-y-8">
+        <!-- Brand Header inside Card -->
+        <div class="text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-600 via-amber-500 to-yellow-300 text-slate-950 shadow-xl shadow-amber-500/25 mb-4 transform hover:scale-105 transition-transform">
+                <svg class="w-10 h-10" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L1 21h22L12 2zm0 3.84L19.35 19H12V5.84z"/>
+                </svg>
+            </div>
+            <h2 class="font-serif text-3xl font-extrabold text-amber-400 tracking-wide">
+                Pharaoh's Portal
+            </h2>
+            <p class="mt-2 text-sm text-slate-400">
+                Sign in to manage your Egyptian pyramid tours and bookings
+            </p>
+        </div>
+
+        <!-- Styled Card Layout -->
+        <div class="bg-slate-900/90 border border-amber-500/30 rounded-2xl shadow-2xl p-8 backdrop-blur-xl relative">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent rounded-t-2xl"></div>
+
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <div class="mb-6 p-4 rounded-xl bg-red-950/60 border border-red-500/50 flex items-start gap-3 text-red-200 text-sm animate-fade-in">
+                    <svg class="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>@_errorMessage</span>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(_successMessage))
+            {
+                <div class="mb-6 p-4 rounded-xl bg-emerald-950/60 border border-emerald-500/50 flex items-start gap-3 text-emerald-200 text-sm animate-fade-in">
+                    <svg class="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span>@_successMessage</span>
+                </div>
+            }
+
+            <EditForm Model="@_loginModel" OnValidSubmit="HandleLogin" class="space-y-6">
+                <DataAnnotationsValidator />
+
+                <!-- Username or Email Field -->
+                <div>
+                    <label class="block text-xs font-semibold text-amber-300 uppercase tracking-wider mb-2">
+                        Username or Email
+                    </label>
+                    <div class="relative rounded-xl shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                        </div>
+                        <InputText @bind-Value="_loginModel.UsernameOrEmail"
+                                   placeholder="e.g. RamsesExplorer or ramses@pyramids.eg"
+                                   class="block w-full pl-11 pr-4 py-3 bg-slate-950/80 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition" />
+                    </div>
+                    <ValidationMessage For="@(() => _loginModel.UsernameOrEmail)" class="validation-message" />
+                </div>
+
+                <!-- Password Field -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-xs font-semibold text-amber-300 uppercase tracking-wider">
+                            Password
+                        </label>
+                        <button type="button" @onclick="TogglePasswordVisibility" class="text-xs text-slate-400 hover:text-amber-400 transition">
+                            @(_showPassword ? "Hide" : "Show")
+                        </button>
+                    </div>
+                    <div class="relative rounded-xl shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                        </div>
+                        <input type="@(_showPassword ? "text" : "password")"
+                               value="@_loginModel.Password"
+                               @onchange="@((ChangeEventArgs e) => _loginModel.Password = e.Value?.ToString() ?? string.Empty)"
+                               placeholder="••••••••••••"
+                               class="block w-full pl-11 pr-4 py-3 bg-slate-950/80 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition" />
+                    </div>
+                    <ValidationMessage For="@(() => _loginModel.Password)" class="validation-message" />
+                </div>
+
+                <!-- Remember Me & Forgot link -->
+                <div class="flex items-center justify-between text-xs">
+                    <label class="flex items-center gap-2 cursor-pointer text-slate-400 hover:text-slate-300">
+                        <input type="checkbox" @bind="_loginModel.RememberMe"
+                               class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-amber-500 focus:ring-amber-400 focus:ring-offset-slate-900" />
+                        <span>Remember my session</span>
+                    </label>
+                    <span class="text-amber-400/80 hover:text-amber-300 cursor-pointer">
+                        Forgot password?
+                    </span>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit"
+                        disabled="@_isSubmitting"
+                        class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-slate-950 font-bold bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 shadow-lg shadow-amber-500/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50">
+                    @if (_isSubmitting)
+                    {
+                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-slate-950" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                        </svg>
+                        <span>Authenticating...</span>
+                    }
+                    else
+                    {
+                        <span>Sign In to Explorer Portal</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                        </svg>
+                    }
+                </button>
+
+                <!-- Quick Demo Login Button for Convenience -->
+                <div class="pt-2">
+                    <button type="button" @onclick="AutofillDemoUser"
+                            class="w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-amber-300 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 transition-colors flex items-center justify-center gap-2">
+                        <span>⚡ Quick Demo Credentials (RamsesExplorer)</span>
+                    </button>
+                </div>
+            </EditForm>
+
+            <!-- Link to Register Page -->
+            <div class="mt-8 pt-6 border-t border-slate-800 text-center">
+                <p class="text-sm text-slate-400">
+                    New to Egypt Pyramids Tourism?
+                    <a href="register" class="font-semibold text-amber-400 hover:text-amber-300 ml-1 underline-offset-4 hover:underline">
+                        Create an account →
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private LoginViewModel _loginModel = new();
+    private string? _errorMessage;
+    private string? _successMessage;
+    private bool _showPassword = false;
+    private bool _isSubmitting = false;
+
+    private void TogglePasswordVisibility()
+    {
+        _showPassword = !_showPassword;
+    }
+
+    private void AutofillDemoUser()
+    {
+        _loginModel.UsernameOrEmail = "RamsesExplorer";
+        _loginModel.Password = "Password123!";
+        _errorMessage = null;
+    }
+
+    private async Task HandleLogin()
+    {
+        _isSubmitting = true;
+        _errorMessage = null;
+
+        await Task.Delay(300); // Smooth UI feedback
+
+        if (TravelService.Login(_loginModel.UsernameOrEmail, _loginModel.Password, out var error))
+        {
+            _successMessage = "Authentication successful! Redirecting to dashboard...";
+            await Task.Delay(400);
+            Navigation.NavigateTo("dashboard");
+        }
+        else
+        {
+            _errorMessage = error ?? "Failed to sign in. Please verify your credentials.";
+            _isSubmitting = false;
+        }
+    }
+
+    public class LoginViewModel
+    {
+        [Required(ErrorMessage = "Please enter your username or email address.")]
+        public string UsernameOrEmail { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Please enter your password.")]
+        [MinLength(6, ErrorMessage = "Password must be at least 6 characters.")]
+        public string Password { get; set; } = string.Empty;
+
+        public bool RememberMe { get; set; } = true;
+    }
+}
+

@@ -1,0 +1,75 @@
+@inherits LayoutComponentBase
+
+<div class="min-h-screen flex flex-col bg-egypt-night text-slate-100 selection:bg-amber-400 selection:text-slate-950">
+    <!-- Top Navigation Header -->
+    <NavMenu />
+
+    <!-- Main Content Area -->
+    <main class="flex-1">
+        @Body
+    </main>
+
+    <!-- Monumental Egypt Tourism Footer -->
+    <footer class="bg-slate-950 border-t border-slate-900 mt-16 text-slate-400">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <!-- Col 1: About -->
+                <div class="md:col-span-2 space-y-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center text-slate-950 font-bold">
+                            ▲
+                        </div>
+                        <span class="font-serif font-bold text-lg text-amber-400 tracking-wide">
+                            EGYPT PYRAMIDS TOURISM
+                        </span>
+                    </div>
+                    <p class="text-sm text-slate-400 leading-relaxed max-w-md">
+                        Promoting sustainable discovery and cultural preservation of the Pyramids of Giza and Saqqara. Step into ancient history, explore monumental tombs, and experience 4,500 years of civilization.
+                    </p>
+                    <div class="flex items-center gap-2 text-xs text-amber-400/90 font-medium bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-lg w-fit">
+                        <span>🏛️ UNESCO World Heritage Site #86 (Memphis and its Necropolis)</span>
+                    </div>
+                </div>
+
+                <!-- Col 2: Fast Navigation -->
+                <div>
+                    <h4 class="font-serif text-amber-400 font-semibold mb-3 tracking-wider text-sm uppercase">Quick Links</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="dashboard" class="hover:text-amber-400 transition-colors">Portal Dashboard</a></li>
+                        <li><a href="login" class="hover:text-amber-400 transition-colors">Member Sign In</a></li>
+                        <li><a href="register" class="hover:text-amber-400 transition-colors">Register Explorer Account</a></li>
+                        <li><a href="dashboard#promoted-pyramids" class="hover:text-amber-400 transition-colors">Featured Monuments</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Visitor Advisory -->
+                <div>
+                    <h4 class="font-serif text-amber-400 font-semibold mb-3 tracking-wider text-sm uppercase">Visitor Info</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li>📍 Giza Plateau, Al Haram, Giza Governorate</li>
+                        <li>🕒 Plateau Hours: 08:00 AM – 05:00 PM</li>
+                        <li>🎟️ E-Tickets & Official QR entry valid at gate</li>
+                        <li>🐪 Camel & Solar Boat Museum nearby</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="pt-8 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+                <p>© @DateTime.Now.Year Egyptian Ministry of Tourism & Antiquities • Built with Blazor & Tailwind CSS</p>
+                <div class="flex gap-4">
+                    <span class="hover:text-amber-400 cursor-pointer">Official Guidelines</span>
+                    <span>•</span>
+                    <span class="hover:text-amber-400 cursor-pointer">Visitor Safety</span>
+                    <span>•</span>
+                    <span class="hover:text-amber-400 cursor-pointer">Heritage Preservation</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload font-bold underline ml-2">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>

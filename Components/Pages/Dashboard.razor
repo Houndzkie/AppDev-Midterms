@@ -1,0 +1,589 @@
+@page "/dashboard"
+@inject TravelDataService TravelService
+@inject NavigationManager Navigation
+@implements IDisposable
+@rendermode InteractiveServer
+
+<PageTitle>Dashboard • Egypt Pyramids Tourism</PageTitle>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+
+    <!-- 1. Hero / Personalized Welcome Banner -->
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-amber-950/40 to-slate-900 border border-amber-500/30 p-8 sm:p-10 shadow-2xl">
+        <div class="absolute -right-16 -top-16 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+            <div class="space-y-3">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-semibold tracking-wider uppercase">
+                    <span>👑 UNESCO World Heritage Site</span>
+                    <span>•</span>
+                    <span>7 Wonders of the Ancient World</span>
+                </div>
+                <h1 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
+                    Explore the <span class="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent">Pyramids of Egypt</span>
+                </h1>
+                <p class="text-slate-300 text-sm sm:text-base max-w-2xl leading-relaxed">
+                    Welcome to the official traveler portal. Plan excursions, inspect historical engineering milestones, and reserve guided explorations across the Giza Plateau and Saqqara.
+                </p>
+
+                <!-- Current User Interests Tags Display -->
+                @if (TravelService.IsAuthenticated && TravelService.CurrentUser != null)
+                {
+                    <div class="pt-2 flex flex-wrap items-center gap-2">
+                        <span class="text-xs text-slate-400 font-medium">Explorer Profile: <strong class="text-amber-400">@TravelService.CurrentUser.Username</strong></span>
+                        <span class="text-slate-600">|</span>
+                        <span class="text-xs text-slate-400">Interests:</span>
+                        @if (TravelService.CurrentUser.Preferences != null && TravelService.CurrentUser.Preferences.Any())
+                        {
+                            @foreach (var tag in TravelService.CurrentUser.Preferences)
+                            {
+                                <span class="px-2.5 py-0.5 rounded-full bg-slate-800/80 border border-slate-700 text-amber-300 text-xs font-medium">
+                                    @tag
+                                </span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-xs text-slate-500 italic">No preferences selected yet</span>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Header Quick Action -->
+            <div class="flex-shrink-0 flex sm:flex-col gap-3">
+                <button @onclick="() => OpenBookingModal(TravelService.Pyramids.FirstOrDefault()?.Id ?? 1)"
+                        class="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-bold text-sm shadow-xl shadow-amber-500/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+                    </svg>
+                    <span>Book a Tour Now</span>
+                </button>
+                <a href="#active-bookings"
+                   class="px-5 py-3 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-300 text-center text-xs font-semibold transition">
+                    View Active Bookings (@TravelService.Bookings.Count)
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert / Toast Notification -->
+    @if (!string.IsNullOrEmpty(_notificationMessage))
+    {
+        <div class="p-4 rounded-xl bg-emerald-950/70 border border-emerald-500/50 flex items-center justify-between text-emerald-200 text-sm shadow-lg animate-fade-in">
+            <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span>@_notificationMessage</span>
+            </div>
+            <button @onclick="() => _notificationMessage = null" class="text-emerald-400 hover:text-emerald-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+    }
+
+    <!-- 2. Summary Stats Cards (Destinations, Best Season, Active Bookings, Rating) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Card 1: Destinations -->
+        <div class="bg-slate-900/80 border border-slate-800 hover:border-amber-500/40 rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/5 group">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Destinations</span>
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg group-hover:scale-110 transition-transform">
+                    🏛️
+                </div>
+            </div>
+            <div class="font-serif text-3xl font-extrabold text-white">
+                @TravelService.Pyramids.Count <span class="text-sm font-sans font-medium text-amber-400">Heritage Sites</span>
+            </div>
+            <div class="mt-2 flex items-center justify-between text-xs text-slate-400">
+                <span>Giza & Saqqara</span>
+                <span class="text-emerald-400 font-medium">100% UNESCO</span>
+            </div>
+        </div>
+
+        <!-- Card 2: Best Season -->
+        <div class="bg-slate-900/80 border border-slate-800 hover:border-amber-500/40 rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/5 group">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Best Season</span>
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg group-hover:scale-110 transition-transform">
+                    ☀️
+                </div>
+            </div>
+            <div class="font-serif text-3xl font-extrabold text-white">
+                Oct – Apr
+            </div>
+            <div class="mt-2 flex items-center justify-between text-xs text-slate-400">
+                <span>Mild 24°C / 75°F</span>
+                <span class="text-amber-400 font-medium">Prime Weather</span>
+            </div>
+        </div>
+
+        <!-- Card 3: Active Bookings -->
+        <div class="bg-slate-900/80 border border-slate-800 hover:border-amber-500/40 rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/5 group">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Bookings</span>
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg group-hover:scale-110 transition-transform">
+                    🎟️
+                </div>
+            </div>
+            <div class="font-serif text-3xl font-extrabold text-amber-400">
+                @TravelService.Bookings.Count(b => b.Status == "Confirmed")
+                <span class="text-sm font-sans font-medium text-slate-400">Confirmed</span>
+            </div>
+            <div class="mt-2 flex items-center justify-between text-xs text-slate-400">
+                <span>@TravelService.Bookings.Sum(b => b.NumberOfTickets) Total Tickets</span>
+                <span class="text-emerald-400 font-medium">Instant E-Ticket</span>
+            </div>
+        </div>
+
+        <!-- Card 4: Visitor Satisfaction -->
+        <div class="bg-slate-900/80 border border-slate-800 hover:border-amber-500/40 rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/5 group">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tourist Rating</span>
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg group-hover:scale-110 transition-transform">
+                    ⭐
+                </div>
+            </div>
+            <div class="font-serif text-3xl font-extrabold text-white">
+                4.92 <span class="text-sm font-sans font-medium text-amber-400">/ 5.0</span>
+            </div>
+            <div class="mt-2 flex items-center justify-between text-xs text-slate-400">
+                <span>12,800+ Verified Reviews</span>
+                <span class="text-amber-400 font-medium">Top Middle East</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Promoted Pyramids Responsive Grid -->
+    <div id="promoted-pyramids" class="space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+                <h2 class="font-serif text-2xl sm:text-3xl font-bold text-white tracking-wide">
+                    Promoted Ancient Pyramids
+                </h2>
+                <p class="text-slate-400 text-sm mt-1">
+                    Discover Egypt's greatest archaeological monuments. Select any pyramid to reserve your guided tour.
+                </p>
+            </div>
+            <span class="text-xs text-amber-400 font-medium bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-lg w-fit">
+                🏛️ Local Archaeological Assets Active
+            </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            @foreach (var pyramid in TravelService.Pyramids)
+            {
+                <div class="group bg-slate-900/80 border border-slate-800 hover:border-amber-500/40 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-amber-500/10 transition-all duration-300 flex flex-col">
+                    
+                    <!-- Dynamic Image with local reference and exact Tailwind styling requested -->
+                    <div class="relative overflow-hidden h-48 bg-slate-950">
+                        <img src="@pyramid.ImageUrl"
+                             alt="@pyramid.Name"
+                             class="w-full h-48 object-cover rounded-t-xl transition-transform duration-500 hover:scale-105 group-hover:scale-105" />
+                        
+                        <!-- Badges Overlaid on Image -->
+                        <div class="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md border border-amber-500/40 px-2.5 py-1 rounded-lg text-xs font-semibold text-amber-300">
+                            @pyramid.BuiltEra
+                        </div>
+                        
+                        <div class="absolute top-3 right-3 bg-slate-950/80 backdrop-blur-md border border-slate-700 px-2.5 py-1 rounded-lg text-xs font-bold text-amber-400 flex items-center gap-1">
+                            <span>★</span>
+                            <span>@pyramid.Rating.ToString("F2")</span>
+                        </div>
+
+                        <div class="absolute bottom-3 left-3 bg-slate-950/80 backdrop-blur-md px-2.5 py-1 rounded-lg text-xs text-slate-300 flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>@pyramid.Location</span>
+                        </div>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+                        <div>
+                            <div class="flex items-start justify-between gap-2">
+                                <h3 class="font-serif text-xl font-bold text-white group-hover:text-amber-400 transition-colors">
+                                    @pyramid.Name
+                                </h3>
+                            </div>
+                            
+                            <!-- Height and Architecture Metric -->
+                            <div class="mt-2 inline-flex items-center gap-1.5 text-xs text-amber-400/90 font-medium bg-amber-500/10 px-2.5 py-1 rounded-md">
+                                <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                                </svg>
+                                <span>Height: @pyramid.Height m</span>
+                            </div>
+
+                            <p class="mt-3 text-slate-400 text-xs sm:text-sm line-clamp-3 leading-relaxed">
+                                @pyramid.Description
+                            </p>
+                        </div>
+
+                        <!-- Pricing and Quick Book Interaction -->
+                        <div class="pt-4 border-t border-slate-800 flex items-center justify-between">
+                            <div>
+                                <span class="block text-xs text-slate-400">Entry Ticket</span>
+                                <span class="font-serif text-xl font-extrabold text-amber-400">
+                                    $@pyramid.EntryFeeUSD.ToString("F2")
+                                </span>
+                                <span class="text-xs text-slate-500"> / person</span>
+                            </div>
+
+                            <button @onclick="() => OpenBookingModal(pyramid.Id)"
+                                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 transition-all transform hover:scale-105 active:scale-95">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                <span>Book Tour</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- 4. Dynamic Table Displaying Active Bookings -->
+    <div id="active-bookings" class="space-y-6 pt-6">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+                <h2 class="font-serif text-2xl sm:text-3xl font-bold text-white tracking-wide">
+                    Active Tour Bookings
+                </h2>
+                <p class="text-slate-400 text-sm mt-1">
+                    Live schedule of confirmed expeditions and ticket passes across all historical monuments
+                </p>
+            </div>
+            
+            <button @onclick="() => OpenBookingModal(TravelService.Pyramids.FirstOrDefault()?.Id ?? 1)"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 text-xs font-semibold transition self-start sm:self-auto">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                <span>New Reservation</span>
+            </button>
+        </div>
+
+        @if (TravelService.Bookings == null || !TravelService.Bookings.Any())
+        {
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-12 text-center space-y-4">
+                <div class="w-16 h-16 mx-auto rounded-full bg-slate-800 flex items-center justify-center text-3xl text-amber-400">
+                    🎟️
+                </div>
+                <h3 class="text-lg font-bold text-white">No active tour bookings yet</h3>
+                <p class="text-sm text-slate-400 max-w-md mx-auto">
+                    You haven't reserved any pyramid excursions yet. Choose a pyramid from the promoted list above to initiate your adventure.
+                </p>
+                <button @onclick="() => OpenBookingModal(TravelService.Pyramids.FirstOrDefault()?.Id ?? 1)"
+                        class="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs uppercase tracking-wider hover:bg-amber-400 transition">
+                    Explore & Book Now
+                </button>
+            </div>
+        }
+        else
+        {
+            <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/90 shadow-xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-300">
+                        <thead class="bg-slate-950 text-xs uppercase tracking-wider text-amber-400 border-b border-slate-800">
+                            <tr>
+                                <th scope="col" class="px-6 py-4 font-semibold">Booking ID</th>
+                                <th scope="col" class="px-6 py-4 font-semibold">Monument</th>
+                                <th scope="col" class="px-6 py-4 font-semibold">Tour Date</th>
+                                <th scope="col" class="px-6 py-4 font-semibold">Tickets</th>
+                                <th scope="col" class="px-6 py-4 font-semibold">Total Price</th>
+                                <th scope="col" class="px-6 py-4 font-semibold">Status</th>
+                                <th scope="col" class="px-6 py-4 font-semibold text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800">
+                            @foreach (var booking in TravelService.Bookings)
+                            {
+                                var matchingPyramid = TravelService.Pyramids.FirstOrDefault(p => p.Id == booking.PyramidId);
+                                <tr class="hover:bg-slate-800/40 transition-colors">
+                                    <td class="px-6 py-4 font-mono font-medium text-amber-300">
+                                        #EGY-@booking.Id.ToString("D4")
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            @if (matchingPyramid != null)
+                                            {
+                                                <img src="@matchingPyramid.ImageUrl" alt="@booking.PyramidName" class="w-9 h-9 object-cover rounded-lg border border-slate-700 flex-shrink-0" />
+                                            }
+                                            <div>
+                                                <span class="font-semibold text-white block">@booking.PyramidName</span>
+                                                <span class="text-xs text-slate-400 block">Guided Expedition</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-2">
+                                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                            </svg>
+                                            <span class="text-slate-200">@booking.TourDate.ToString("MMM dd, yyyy")</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 font-semibold text-slate-100">
+                                        @booking.NumberOfTickets @(booking.NumberOfTickets == 1 ? "Ticket" : "Tickets")
+                                    </td>
+                                    <td class="px-6 py-4 font-serif font-bold text-amber-400">
+                                        $@booking.TotalPrice.ToString("F2") USD
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        @if (booking.Status == "Confirmed")
+                                        {
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                                Confirmed
+                                            </span>
+                                        }
+                                        else if (booking.Status == "Cancelled")
+                                        {
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/30">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+                                                Cancelled
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                                                @booking.Status
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+                                            @if (booking.Status == "Confirmed")
+                                            {
+                                                <button @onclick="() => CancelBooking(booking.Id)"
+                                                        title="Cancel Tour"
+                                                        class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-transparent hover:border-red-500/30 transition">
+                                                    Cancel
+                                                </button>
+                                            }
+                                            <button @onclick="() => DeleteBooking(booking.Id)"
+                                                    title="Remove record"
+                                                    class="p-1.5 text-slate-500 hover:text-slate-300 rounded-lg hover:bg-slate-800 transition">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- 5. Quick "Book Tour" Modal Interaction -->
+@if (_isBookingModalOpen)
+{
+    var selectedPyramid = TravelService.Pyramids.FirstOrDefault(p => p.Id == _selectedPyramidId) 
+                          ?? TravelService.Pyramids.First();
+
+    <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
+        <div class="relative bg-slate-900 border border-amber-500/30 rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden" @onclick:stopPropagation="true">
+            
+            <!-- Modal Header -->
+            <div class="px-6 py-5 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 text-lg">
+                        🎟️
+                    </div>
+                    <div>
+                        <h3 class="font-serif text-lg font-bold text-amber-400">Quick Tour Booking</h3>
+                        <p class="text-xs text-slate-400">Instant reservation & guaranteed entry</p>
+                    </div>
+                </div>
+                <button @onclick="CloseBookingModal" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Content & Form -->
+            <div class="p-6 space-y-5">
+                <!-- Pyramid Selection -->
+                <div>
+                    <label class="block text-xs font-semibold text-amber-300 uppercase tracking-wider mb-2">
+                        Select Destination Monument
+                    </label>
+                    <select value="@_selectedPyramidId" @onchange="OnPyramidSelectionChanged"
+                            class="block w-full py-3 px-4 bg-slate-950 border border-slate-700 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition">
+                        @foreach (var p in TravelService.Pyramids)
+                        {
+                            <option value="@p.Id">@p.Name ($@p.EntryFeeUSD.ToString("F2") USD)</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Selected Pyramid Preview Card -->
+                <div class="flex items-center gap-4 p-3 rounded-xl bg-slate-950/70 border border-slate-800">
+                    <img src="@selectedPyramid.ImageUrl" alt="@selectedPyramid.Name" class="w-16 h-16 object-cover rounded-lg border border-slate-700 flex-shrink-0" />
+                    <div class="text-xs space-y-1">
+                        <div class="font-semibold text-white">@selectedPyramid.Name</div>
+                        <div class="text-slate-400">📍 @selectedPyramid.Location</div>
+                        <div class="text-amber-400 font-semibold">$@selectedPyramid.EntryFeeUSD.ToString("F2") USD per attendee</div>
+                    </div>
+                </div>
+
+                <!-- Date Selection -->
+                <div>
+                    <label class="block text-xs font-semibold text-amber-300 uppercase tracking-wider mb-2">
+                        Tour Date
+                    </label>
+                    <input type="date"
+                           value="@_bookingDate.ToString("yyyy-MM-dd")"
+                           min="@DateTime.Today.ToString("yyyy-MM-dd")"
+                           @onchange="OnDateChanged"
+                           class="block w-full py-3 px-4 bg-slate-950 border border-slate-700 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition" />
+                </div>
+
+                <!-- Tickets Stepper -->
+                <div>
+                    <label class="block text-xs font-semibold text-amber-300 uppercase tracking-wider mb-2">
+                        Number of Tickets
+                    </label>
+                    <div class="flex items-center gap-3">
+                        <button type="button" @onclick="DecrementTickets"
+                                class="w-11 h-11 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-lg font-bold flex items-center justify-center transition">
+                            -
+                        </button>
+                        <div class="flex-1 py-2.5 px-4 bg-slate-950 border border-slate-700 rounded-xl text-center text-slate-100 font-bold text-base">
+                            @_bookingTickets @(_bookingTickets == 1 ? "Ticket" : "Tickets")
+                        </div>
+                        <button type="button" @onclick="IncrementTickets"
+                                class="w-11 h-11 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-lg font-bold flex items-center justify-center transition">
+                            +
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Real-time Pricing Summary Calculation -->
+                <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2">
+                    <div class="flex items-center justify-between text-xs text-slate-300">
+                        <span>Ticket Base Rate (@_bookingTickets × $@selectedPyramid.EntryFeeUSD.ToString("F2"))</span>
+                        <span>$@((_bookingTickets * selectedPyramid.EntryFeeUSD).ToString("F2")) USD</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs text-slate-300">
+                        <span>UNESCO Heritage Preservation Levy</span>
+                        <span class="text-emerald-400">Included ($0.00)</span>
+                    </div>
+                    <div class="pt-2 border-t border-amber-500/20 flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase text-amber-300">Total Price</span>
+                        <span class="font-serif text-2xl font-black text-amber-400">
+                            $@((_bookingTickets * selectedPyramid.EntryFeeUSD).ToString("F2")) USD
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer Actions -->
+            <div class="px-6 py-4 bg-slate-950 border-t border-slate-800 flex items-center justify-end gap-3">
+                <button type="button" @onclick="CloseBookingModal"
+                        class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition">
+                    Cancel
+                </button>
+                <button type="button" @onclick="ConfirmBooking"
+                        class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-bold text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 transition-all transform hover:-translate-y-0.5">
+                    Confirm Reservation
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool _isBookingModalOpen = false;
+    private int _selectedPyramidId = 1;
+    private DateTime _bookingDate = DateTime.Today.AddDays(2);
+    private int _bookingTickets = 2;
+    private string? _notificationMessage;
+
+    protected override void OnInitialized()
+    {
+        TravelService.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        TravelService.OnChange -= StateHasChanged;
+    }
+
+    private void OpenBookingModal(int pyramidId)
+    {
+        _selectedPyramidId = pyramidId;
+        _bookingTickets = 2;
+        _bookingDate = DateTime.Today.AddDays(2);
+        _isBookingModalOpen = true;
+    }
+
+    private void CloseBookingModal()
+    {
+        _isBookingModalOpen = false;
+    }
+
+    private void OnPyramidSelectionChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var id))
+        {
+            _selectedPyramidId = id;
+        }
+    }
+
+    private void OnDateChanged(ChangeEventArgs e)
+    {
+        if (DateTime.TryParse(e.Value?.ToString(), out var date))
+        {
+            _bookingDate = date;
+        }
+    }
+
+    private void IncrementTickets()
+    {
+        if (_bookingTickets < 20) _bookingTickets++;
+    }
+
+    private void DecrementTickets()
+    {
+        if (_bookingTickets > 1) _bookingTickets--;
+    }
+
+    private void ConfirmBooking()
+    {
+        var booking = TravelService.CreateBooking(_selectedPyramidId, _bookingDate, _bookingTickets);
+        if (booking != null)
+        {
+            _notificationMessage = $"Success! Your tour for {booking.PyramidName} on {booking.TourDate:MMM dd, yyyy} ({booking.NumberOfTickets} tickets) has been confirmed under #{booking.Id}.";
+            _isBookingModalOpen = false;
+        }
+    }
+
+    private void CancelBooking(int bookingId)
+    {
+        if (TravelService.CancelBooking(bookingId))
+        {
+            _notificationMessage = $"Booking #{bookingId} was successfully marked as Cancelled.";
+        }
+    }
+
+    private void DeleteBooking(int bookingId)
+    {
+        if (TravelService.DeleteBooking(bookingId))
+        {
+            _notificationMessage = $"Booking #{bookingId} has been removed from active records.";
+        }
+    }
+}
+
