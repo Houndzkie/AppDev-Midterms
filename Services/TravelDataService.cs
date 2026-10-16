@@ -40,7 +40,7 @@ public class TravelDataService
                 BuiltEra = "Old Kingdom, 4th Dynasty (~2560 BC)",
                 Description = "The monumental tomb of Pharaoh Khufu. The oldest and sole surviving wonder of the original Seven Wonders of the Ancient World, constructed with over 2.3 million megalithic limestone blocks.",
                 EntryFeeUSD = 25.00m,
-                ImageUrl = "images/pyramid1.jpg",
+                ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Great_Pyramid_of_Giza_-_Pyramid_of_Khufu.jpg/1280px-Great_Pyramid_of_Giza_-_Pyramid_of_Khufu.jpg",
                 Rating = 4.95
             },
             new Pyramid
@@ -52,7 +52,7 @@ public class TravelDataService
                 BuiltEra = "Old Kingdom, 4th Dynasty (~2570 BC)",
                 Description = "Built for Pharaoh Khafre, son of Khufu. Perched on higher bedrock and still crowned by its lustrous original polished Tura limestone casing stones, guarded by the iconic Great Sphinx.",
                 EntryFeeUSD = 20.00m,
-                ImageUrl = "images/pyramid2.jpg",
+                ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/6/69/Pyramid_of_Khafre_and_Sphinx%2C_Giza%2C_Greater_Cairo%2C_Egypt.jpg",
                 Rating = 4.88
             },
             new Pyramid
@@ -64,7 +64,7 @@ public class TravelDataService
                 BuiltEra = "Old Kingdom, 3rd Dynasty (~2670 BC)",
                 Description = "Designed by the legendary architect Imhotep for Pharaoh Djoser. Widely celebrated as humanity's very first colossal stone monument, pioneering a revolutionary six-tiered mastaba design.",
                 EntryFeeUSD = 18.00m,
-                ImageUrl = "images/pyramid3.jpg",
+                ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Sakkara_01.jpg/1280px-Sakkara_01.jpg",
                 Rating = 4.82
             }
         };
