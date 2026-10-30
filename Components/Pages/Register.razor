@@ -3,7 +3,7 @@
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 
-<PageTitle>Register • Egypt Pyramids Tourism</PageTitle>
+<PageTitle>Register • PyramidX</PageTitle>
 
 <div class="relative min-h-[calc(100vh-5rem)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
     <!-- Desert Background Glow -->
@@ -23,7 +23,7 @@
                 Join the Expedition
             </h2>
             <p class="mt-2 text-sm text-slate-400">
-                Create your explorer account and personalize your Pyramids of Egypt travel journey
+                Create your explorer account and personalize your PyramidX travel journey
             </p>
         </div>
 
@@ -262,7 +262,7 @@
 
         if (TravelService.Register(newUser, out var error))
         {
-            _successMessage = "Account created successfully! Welcome to the Pyramids of Egypt Portal.";
+            _successMessage = "Account created successfully! Welcome to the PyramidX Portal.";
             await Task.Delay(800);
             Navigation.NavigateTo("dashboard");
         }

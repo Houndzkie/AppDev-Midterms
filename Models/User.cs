@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Midterms.Models;
 
 /// <summary>
-/// Represents an authenticated or registered user in the Egypt Pyramids Tourism portal.
+/// Represents an authenticated or registered user in the PyramidX tourism portal.
 /// </summary>
 public class User
 {

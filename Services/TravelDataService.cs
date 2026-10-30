@@ -3,7 +3,7 @@ using Midterms.Models;
 namespace Midterms.Services;
 
 /// <summary>
-/// Scoped service providing state management for the Egypt Pyramids Tourism portal.
+/// Scoped service providing state management for the PyramidX tourism portal.
 /// Holds the promoted pyramids list, user session, and active tour bookings across all pages.
 /// </summary>
 public class TravelDataService
